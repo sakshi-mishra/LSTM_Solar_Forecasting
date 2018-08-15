@@ -15,6 +15,8 @@ import data_input
 import LSTMModel
 import exploratory_data_analysis
 import data_cleaning
+import data_preprocessing
+import postprocessing_and_results
 
 
 parser = argparse.ArgumentParser()
@@ -92,6 +94,7 @@ df_train, df_test = data_cleaning.CleanData(df_train, df_test, run_train)
 # pre-processing the data by making the Kt (clear sky index at time t) column
 # by first removing rows with ghi==0
 
+X_train, y_train, X_test, y_test, df_new_test = data_preprocessing.PreProcess(df_train, df_test, run_train)
 
 
 ### start of LSTM
@@ -151,7 +154,7 @@ if run_train:
     # Training the model
     seq_dim = 1
 
-    n_iter =0
+    n_iter = 0
     num_samples = len(X_train)
     test_samples = len(X_test)
     batch_size = 100
@@ -186,7 +189,7 @@ if run_train:
             n_iter += 1
             test_batch_mse =list()
             if n_iter%100 == 0:
-                for i in range(0,int(test_samples/batch_size -1)):
+                for i in range(0, int(test_samples/batch_size -1)):
                     features = Variable(X_test[i*batch_size:(i+1)*batch_size, :]).view(-1, seq_dim, feat_dim)
                     Kt_test = Variable(y_test[i*batch_size:(i+1)*batch_size])
 
@@ -195,7 +198,7 @@ if run_train:
                     test_batch_mse.append(np.mean([(Kt_test.data.numpy() - outputs.data.numpy().squeeze())**2],axis=1))
 
                 test_iter.append(n_iter)
-                test_loss.append(np.mean([test_batch_mse],axis=1))
+                test_loss.append(np.mean([test_batch_mse], axis=1))
 
                 print('Epoch: {} Iteration: {}. Train_MSE: {}. Test_MSE: {}'.format(epoch, n_iter, loss.data[0], test_loss[-1]))
 
@@ -245,70 +248,4 @@ plt.plot(np.array(test_loss).squeeze(),'r')
 figLoss.savefig(RESULTS_DIR + '/' + 'test_loss.jpg', bbox_inches = 'tight')
 
 
-#### Demornamization
-
-# TODO: Should we be using the mean instead of -1?
-mse_1 = np.array(test_loss).squeeze()[-1][0]
-mse_2 = np.array(test_loss).squeeze()[-1][1]
-mse_3 = np.array(test_loss).squeeze()[-1][2]
-mse_4 = np.array(test_loss).squeeze()[-1][3]
-
-rmse_1 = np.sqrt(mse_1)
-rmse_2 = np.sqrt(mse_2)
-rmse_3 = np.sqrt(mse_3)
-rmse_4 = np.sqrt(mse_4)
-
-print("rmse_1:",rmse_1)
-print("rmse_2:",rmse_2)
-print("rmse_3:",rmse_3)
-print("rmse_4:",rmse_4)
-
-rmse_denorm1 = (rmse_1 * (df_new_test['Kt'].max() - df_new_test['Kt'].min()))+ df_new_test['Kt'].mean()
-rmse_denorm2 = (rmse_2 * (df_new_test['Kt_2'].max() - df_new_test['Kt_2'].min()))+ df_new_test['Kt_2'].mean()
-rmse_denorm3 = (rmse_3 * (df_new_test['Kt_3'].max() - df_new_test['Kt_3'].min()))+ df_new_test['Kt_3'].mean()
-rmse_denorm4 = (rmse_4 * (df_new_test['Kt_4'].max() - df_new_test['Kt_4'].min()))+ df_new_test['Kt_4'].mean()
-
-print("rmse_denorm1:",rmse_denorm1)
-print("rmse_denorm2:",rmse_denorm2)
-print("rmse_denorm3:",rmse_denorm3)
-print("rmse_denorm4:",rmse_denorm4)
-
-rmse_denorm_all = [rmse_denorm1, rmse_denorm2, rmse_denorm3, rmse_denorm4]
-
-rmse_mean = np.mean([rmse_denorm1, rmse_denorm2, rmse_denorm3, rmse_denorm4])
-print("rmse_mean:",rmse_mean)
-
-print(df_new_test['Kt'].describe())
-print('\n')
-print(df_new_test['Kt_2'].describe())
-print('\n')
-print(df_new_test['Kt_3'].describe())
-print('\n')
-print(df_new_test['Kt_4'].describe())
-
-
-# Write to file
-f = open(RESULTS_DIR + '/' + 'results.txt', 'a+')
-j=0
-for i in rmse_denorm_all:
-    j += 1
-    f.write("rmse_denorm{}: {}\r\n".format(j,i))
-f.write('mean_rmse: {}'.format(rmse_mean))
-
-f.close()
-
-# ### Saving train and test losses to a csv
-
-if run_train:
-    df_trainLoss = pd.DataFrame(data={'Train Loss':train_loss}, columns=['Train Loss'])
-    df_trainLoss.head()
-
-testloss_unsqueezed = np.array(test_loss).squeeze()
-
-
-df_testLoss = pd.DataFrame(data=testloss_unsqueezed,columns=['mse1','mse2', 'mse3', 'mse4'])
-df_testLoss.head()
-
-df_testLoss.to_csv(RESULTS_DIR + '/' + '_TestLoss.csv')
-if run_train:
-    df_trainLoss.to_csv(RESULTS_DIR + '/' + '_TrainLoss.csv')
+#postprocessing_and_results.write_to
