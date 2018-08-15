@@ -55,7 +55,6 @@ sys.stdout = open(log_file, 'w')  # Redirect print statement's outputs to file
 print("Stdout:")
 ### NREL Bird Model implementation: for obtaining clear sky GHI
 
-import itertools
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -82,7 +81,7 @@ sns.set_color_codes()
 if run_train:
     # TRAIN set
     #updating the same dataframe by dropping the index columns from clear sky model
-    df_train.drop(['index'],axis=1, inplace=True)
+    df_train.drop(['index'], axis=1, inplace=True)
     # Resetting Index
     df_train.reset_index(drop=True, inplace=True)
 
