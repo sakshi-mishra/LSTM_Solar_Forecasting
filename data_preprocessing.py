@@ -133,7 +133,6 @@ class PreProcess:
 
 
         ### Shifting Kt values to make 1 hour, 2 hour, 3 hour and 4 hour ahead forecast
-
         #### Train dataset
 
         if self.run_train:
@@ -148,13 +147,11 @@ class PreProcess:
                     df_new_train.loc[i].loc[j]['Kt_4'] = df_new_train.loc[i].loc[j]['Kt_4'].shift(-4)
             df_new_train = df_new_train[~(df_new_train['Kt_4'].isnull())]
 
-
         #### Test dataset
 
         levels_index2= []
         for m in df_new_test.index.levels:
             levels_index2.append(m)
-
 
         for i in levels_index2[0]:
             for j in levels_index2[1]:
@@ -162,7 +159,6 @@ class PreProcess:
                 df_new_test.loc[i].loc[j]['Kt_2'] = df_new_test.loc[i].loc[j]['Kt_2'].shift(-2)
                 df_new_test.loc[i].loc[j]['Kt_3'] = df_new_test.loc[i].loc[j]['Kt_3'].shift(-3)
                 df_new_test.loc[i].loc[j]['Kt_4'] = df_new_test.loc[i].loc[j]['Kt_4'].shift(-4)
-
 
         df_new_test = df_new_test[~(df_new_test['Kt_4'].isnull())]
 
@@ -178,6 +174,10 @@ class PreProcess:
         test_norm.reset_index(inplace=True,drop=True)
 
         ### Making train and test sets with train_norm and test_norm
+
+        import math
+        def roundup(x):
+            return int(math.ceil(x / 100.0)) * 100
 
         if self.run_train:
             # TRAIN set
@@ -208,3 +208,6 @@ class PreProcess:
 
         X_test = np.array(X2)
         y_test = np.array(y2)
+
+        return X_train, y_train, X_test, y_test, df_new_test
+
