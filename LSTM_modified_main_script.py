@@ -2,8 +2,19 @@
 
 import sys
 import numpy as np
+import pandas as pd
 import pathlib  # To mimick mkdir -p
 import argparse
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_color_codes()
+
+import bird_sky_model
+import data_input
+import LSTMModel
+import exploratory_data_analysis
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('l',
@@ -53,12 +64,7 @@ log_file = RESULTS_DIR + '/' + 'console.log'
 print("Writing print statements to ", log_file)
 sys.stdout = open(log_file, 'w')  # Redirect print statement's outputs to file
 print("Stdout:")
-### NREL Bird Model implementation: for obtaining clear sky GHI
 
-import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sns
-sns.set_color_codes()
 
 ### CONFIGURE RUNS
 #run_train = True # Disables training & processing of train set; Set it to True for the first time to create a model
@@ -71,12 +77,14 @@ sns.set_color_codes()
 #test_location = "Sioux_Falls" #Folder name
 
 # bird_sky_model.py's output here
-
+cs_test, cs_2010and2011 = bird_sky_model.cs_ghi(test_location, test_year, run_train)
 
 # data_input.py's output here
+df_train, df_test = data_input.load_n_merge(test_location, test_year, run_train, cs_test, cs_2010and2011)
 
+# eploratory data analysis
+plots = exploratory_data_analysis.EDA(df_test)
 
-### Merging Clear Sky GHI And the big dataframe
 
 if run_train:
     # TRAIN set
@@ -154,7 +162,6 @@ print('df_test.shape:',df_test.shape)
 
 
 ### making the Kt (clear sky index at time t) column by first removing rows with ghi==0
-
 
 if run_train:
     # TRAIN dataset
@@ -278,13 +285,9 @@ df_new_test = pd.concat([test_zen,test_dw_solar,test_uw_solar,test_direct_n,test
                          test_windspd,test_winddir,test_pressure,test_ghi,test_Kt,test_Kt_2,test_Kt_3,test_Kt_4], axis=1)
 
 
-#df_new_test.loc[2].xs(17,level='day')
-
-
 ### Shifting Kt values to make 1 hour, 2 hour, 3 hour and 4 hour ahead forecast
 
 #### Train dataset
-
 
 if run_train:
     levels_index= []
@@ -316,7 +319,6 @@ for i in levels_index2[0]:
 
 df_new_test = df_new_test[~(df_new_test['Kt_4'].isnull())]
 
-
 ### Normalize train and test dataframe
 
 if run_train:
@@ -327,7 +329,6 @@ if run_train:
 # TEST set
 test_norm =  (df_new_test - df_new_test.mean()) / (df_new_test.max() - df_new_test.min())
 test_norm.reset_index(inplace=True,drop=True)
-
 
 ### Making train and test sets with train_norm and test_norm
 
@@ -361,7 +362,6 @@ print("y2_test shape is {}".format(y2.shape))
 X_test = np.array(X2)
 y_test = np.array(y2)
 
-
 ### start of LSTM
 
 import torch
@@ -376,7 +376,7 @@ if run_train:
     output_dim = 4
     batch_size = 100
 
-    model = LSTMModel(input_dim, hidden_dim, layer_dim, output_dim)
+    model = LSTMModel.LSTM_Model(input_dim, hidden_dim, layer_dim, output_dim)
 
     # Instantiating Loss Class
     criterion = nn.MSELoss()

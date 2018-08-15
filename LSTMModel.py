@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
-class LSTMModel(nn.Module):
+class LSTM_Model(nn.Module):
     def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
-        super(LSTMModel, self).__init__()
+        super(LSTM_Model, self).__init__()
         #Hidden Dimension
         self.hidden_dim = hidden_dim
 

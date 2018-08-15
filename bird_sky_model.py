@@ -2,6 +2,8 @@ from pvlib import clearsky, atmosphere
 from pvlib.location import Location
 import pandas as pd
 
+### NREL Bird Model implementation: for obtaining clear sky GHI
+
 class ClearSky:
     def __init__(self, test_location, test_year, run_train):
         self.test_location = test_location
@@ -52,10 +54,7 @@ class ClearSky:
            cs_2010and2011.head()
 
 
-
-
         # TEST set
-
         cs_test = bvl.get_clearsky(times)
         cs_test.drop(['dni','dhi'],axis=1, inplace=True) #updating the same dataframe by dropping two columns
         cs_test.reset_index(inplace=True)
@@ -71,3 +70,4 @@ class ClearSky:
         print("cs_test.shape=", cs_test.shape)
 
         return cs_test, cs_2010and2011
+
