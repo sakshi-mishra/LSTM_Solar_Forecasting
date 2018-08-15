@@ -85,7 +85,7 @@ cs_test, cs_2010and2011 = bird_sky_model.cs_ghi(test_location, test_year, run_tr
 # data_input.py's output here
 df_train, df_test = data_input.load_n_merge(test_location, test_year, run_train, cs_test, cs_2010and2011)
 
-# eploratory data analysis
+# exploratory data analysis
 plots = exploratory_data_analysis.EDA(df_test)
 
 # cleaning the data - removing the outliers
@@ -95,7 +95,6 @@ df_train, df_test = data_cleaning.CleanData(df_train, df_test, run_train)
 # by first removing rows with ghi==0
 
 X_train, y_train, X_test, y_test, df_new_test = data_preprocessing.PreProcess(df_train, df_test, run_train)
-
 
 ### start of LSTM
 
@@ -248,4 +247,5 @@ plt.plot(np.array(test_loss).squeeze(),'r')
 figLoss.savefig(RESULTS_DIR + '/' + 'test_loss.jpg', bbox_inches = 'tight')
 
 
-#postprocessing_and_results.write_to
+
+postprocessing_and_results.PostProcess(run_train, test_loss, df_new_test, RESULTS_DIR, train_loss)

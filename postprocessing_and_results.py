@@ -2,11 +2,11 @@ import numpy as np
 import pandas as pd
 
 class PostProcess:
-    def __init__(self, run_train, test_loss, df_new_test, RESULT_DIR, train_loss):
+    def __init__(self, run_train, test_loss, df_new_test, results_dir, train_loss):
         self.run_train = run_train
         self.test_loss = test_loss
         self.df_new_test = df_new_test
-        self.RESULT_DIR = RESULT_DIR
+        self.RESULTS_DIR = results_dir
         self.train_loss = train_loss
         
     def denormalization(self):
@@ -54,7 +54,7 @@ class PostProcess:
         return rmse_denorm_all, rmse_mean
 
     def write_to_file(self):
-        self.rmse_denorm_all, self.rmse_mean = denormalization()
+        self.rmse_denorm_all, self.rmse_mean = self.denormalization()
 
         # Write to file
         f = open(self.RESULTS_DIR + '/' + 'results.txt', 'a+')
