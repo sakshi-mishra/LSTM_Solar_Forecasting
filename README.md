@@ -1,4 +1,4 @@
-# PyTorch implementation of LSTM Model for Multi-time-horizon Solar Forecasting
+# PyTorch implementation of LSTM Model for Multi-time-horizon Solar Forecasting (on-going)
 
 ## How to Run
 ### Conda environment for running the code 
