@@ -5,6 +5,9 @@ import numpy as np
 import pathlib  # To mimick mkdir -p
 import matplotlib.pyplot as plt
 import seaborn as sns
+import torch
+import torch.nn as nn
+from torch.autograd import Variable
 import argparser
 import bird_sky_model
 import data_input
@@ -42,27 +45,30 @@ print("Stdout:")
 
 
 # bird_sky_model.py's output here
-cs_test, cs_2010and2011 = bird_sky_model.cs_ghi(test_location, test_year, run_train)
+clear_sky_ghi = bird_sky_model.ClearSky(test_location, test_year, run_train)
+cs_test, cs_2010and2011 = clear_sky_ghi.cs_ghi()
 
 # data_input.py's output here
-df_train, df_test = data_input.load_n_merge(test_location, test_year, run_train, cs_test, cs_2010and2011)
+input_data = data_input.DataInput(test_location, test_year, run_train, cs_test, cs_2010and2011)
+df_train, df_test = input_data.load_n_merge()
 
 # exploratory data analysis
-plots = exploratory_data_analysis.EDA(df_test)
+eda_plots = exploratory_data_analysis.EDA(df_test)
+plots = eda_plots.plot()
 
 # cleaning the data - removing the outliers
-df_train, df_test = data_cleaning.CleanData(df_train, df_test, run_train)
+df = data_cleaning.CleanData(df_train, df_test, run_train)
+df_train, df_test = df.clean()
 
-# pre-processing the data by making the Kt (clear sky index at time t) column
-# by first removing rows with ghi==0
 
-X_train, y_train, X_test, y_test, df_new_test = data_preprocessing.PreProcess(df_train, df_test, run_train)
-
-    ### start of LSTM
+### start of LSTM
 def main():
-    import torch
-    import torch.nn as nn
-    from torch.autograd import Variable
+
+    # pre-processing the data by making the Kt (clear sky index at time t) column
+    # by first removing rows with ghi==0
+
+    Xy = data_preprocessing.PreProcess(df_train, df_test, run_train)
+    X_train, y_train, X_test, y_test, df_new_test = Xy.data_prepro()
 
     if run_train:
         # Instantiating Model Class
@@ -72,7 +78,8 @@ def main():
         output_dim = 4
         batch_size = 100
 
-        model = LSTMModel.LSTM_Model(input_dim, hidden_dim, layer_dim, output_dim)
+        mod = LSTMModel.LSTM_Model(input_dim, hidden_dim, layer_dim, output_dim)
+        model = mod.forward()
 
         # Instantiating Loss Class
         criterion = nn.MSELoss()
@@ -208,8 +215,10 @@ def main():
 
     figLoss.savefig(RESULTS_DIR + '/' + 'test_loss.jpg', bbox_inches = 'tight')
 
+    return test_loss, train_loss, df_new_test
+
 if __name__=='__main__':
-    main()
+    test_loss, train_loss, df_new_test = main()
 
 
 postprocessing_and_results.PostProcess(run_train, test_loss, df_new_test, RESULTS_DIR, train_loss)
