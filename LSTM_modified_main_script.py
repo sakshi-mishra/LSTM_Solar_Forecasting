@@ -2,14 +2,10 @@
 
 import sys
 import numpy as np
-import pandas as pd
 import pathlib  # To mimick mkdir -p
-import argparse
-
 import matplotlib.pyplot as plt
 import seaborn as sns
-sns.set_color_codes()
-
+import argparser
 import bird_sky_model
 import data_input
 import LSTMModel
@@ -18,45 +14,9 @@ import data_cleaning
 import data_preprocessing
 import postprocessing_and_results
 
+sns.set_color_codes()
 
-parser = argparse.ArgumentParser()
-parser.add_argument('l',
-                    help="Location whose data needs to be trained/tested with"+
-                    "Values can be one of [Bondville, Boulder, Desert_Rock,"
-                                        + "Fort_Peck,Goodwin_Creek, Penn_State,"
-                                         + "Sioux_Falls]")
-parser.add_argument('y',
-                    help='4 digit Test year. One among [2009,2015,2016,2017]')
-parser.add_argument('t',
-                    help='True or False.To train using 2010-2011 data or not')
-parser.add_argument('--num-epochs', default = 1000, type=int,
-                    help="Number of training, testing epochs")
-args, _ = parser.parse_known_args()
-# Sanity check the arguments
-# args.y
-test_year = args.y
-if test_year not in ["2009", "2015", "2016", "2017"]:
-    print("Test year argument is not valid. Exiting...")
-    parser.print_help()
-    exit()
-# args.t
-if args.t  in ["True", "true"]:
-    run_train = True
-elif args.t in ["False", "false"]:
-    run_train = False
-else:
-    print("Train flag is invalid. It should be True or false. Exiting.")
-    parser.print_help()
-# args.l
-test_location = args.l
-if test_location not in ["Bondville", "Boulder", "Desert_Rock",
-                         "Fort_Peck,Goodwin_Creek, Penn_State", "Sioux_Falls"]:
-    print("Test location is not valide.Exiting...")
-    parser.print_help()
-# args.num_epochs
-num_epochs = args.num_epochs
-print("test_location=",test_location, "test_year=",test_year,"run_train=",
-      run_train, "num_epochs=", num_epochs)
+test_location, test_year, run_train, num_epochs = argparser.get_arguments()
 
 # Define the Directories to save the trained model and results. Create the dir
 # if it does not exist using pathlib
@@ -79,6 +39,8 @@ print("Stdout:")
 #test_location = "Penn_State" #Folder name
 #test_location = "Sioux_Falls" #Folder name
 
+
+
 # bird_sky_model.py's output here
 cs_test, cs_2010and2011 = bird_sky_model.cs_ghi(test_location, test_year, run_train)
 
@@ -96,156 +58,158 @@ df_train, df_test = data_cleaning.CleanData(df_train, df_test, run_train)
 
 X_train, y_train, X_test, y_test, df_new_test = data_preprocessing.PreProcess(df_train, df_test, run_train)
 
-### start of LSTM
+    ### start of LSTM
+def main():
+    import torch
+    import torch.nn as nn
+    from torch.autograd import Variable
 
-import torch
-import torch.nn as nn
-from torch.autograd import Variable
+    if run_train:
+        # Instantiating Model Class
+        input_dim = 22
+        hidden_dim = 15
+        layer_dim = 1
+        output_dim = 4
+        batch_size = 100
 
-if run_train:
-    # Instantiating Model Class
-    input_dim = 22
-    hidden_dim = 15
-    layer_dim = 1
-    output_dim = 4
+        model = LSTMModel.LSTM_Model(input_dim, hidden_dim, layer_dim, output_dim)
+
+        # Instantiating Loss Class
+        criterion = nn.MSELoss()
+
+        # Instantiate Optimizer Class
+        learning_rate = 0.001
+        optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+
+        # initializing lists to store losses over epochs:
+        train_loss = []
+        train_iter = []
+        print("Preparing model to train");
+    else:
+        model = torch.load('LSTM_Results/Exp2_1/' + test_location + '/torch_model_2010_2011')
+        print("Loaded model from file\n");
+
+
+    # Test set
+
+    test_loss = []
+    test_iter = []
+    # converting numpy array to torch tensor
+
+    X_test = torch.from_numpy(X_test)
+    y_test = torch.from_numpy(y_test)
+
+    # Convert to Float tensor
+
+    X_test = X_test.type(torch.FloatTensor)
+    y_test = y_test.type(torch.FloatTensor)
+
+
+
+    if run_train:
+        X_train = torch.from_numpy(X_train)
+        y_train = torch.from_numpy(y_train)
+        X_train = X_train.type(torch.FloatTensor)
+        y_train = y_train.type(torch.FloatTensor)
+
+        # Training the model
+        seq_dim = 1
+
+        n_iter = 0
+        num_samples = len(X_train)
+        test_samples = len(X_test)
+        batch_size = 100
+        #num_epochs = 1000  # Defined earlier using args
+        feat_dim = X_train.shape[1]
+
+
+        for epoch in range(num_epochs):
+            for i in range(0, int(num_samples/batch_size -1)):
+
+
+                features = Variable(X_train[i*batch_size:(i+1)*batch_size, :]).view(-1, seq_dim, feat_dim)
+                Kt_value = Variable(y_train[i*batch_size:(i+1)*batch_size])
+
+                #print("Kt_value={}".format(Kt_value))
+
+                optimizer.zero_grad()
+
+                outputs = model(features)
+                #print("outputs ={}".format(outputs))
+
+                loss = criterion(outputs, Kt_value)
+
+                train_loss.append(loss.data[0])
+                train_iter.append(n_iter)
+
+                #print("loss = {}".format(loss))
+                loss.backward()
+
+                optimizer.step()
+
+                n_iter += 1
+                test_batch_mse =list()
+                if n_iter%100 == 0:
+                    for i in range(0, int(test_samples/batch_size -1)):
+                        features = Variable(X_test[i*batch_size:(i+1)*batch_size, :]).view(-1, seq_dim, feat_dim)
+                        Kt_test = Variable(y_test[i*batch_size:(i+1)*batch_size])
+
+                        outputs = model(features)
+
+                        test_batch_mse.append(np.mean([(Kt_test.data.numpy() - outputs.data.numpy().squeeze())**2],axis=1))
+
+                    test_iter.append(n_iter)
+                    test_loss.append(np.mean([test_batch_mse], axis=1))
+
+                    print('Epoch: {} Iteration: {}. Train_MSE: {}. Test_MSE: {}'.format(epoch, n_iter, loss.data[0], test_loss[-1]))
+
+        torch.save(model,MODEL_DIR+ '/torch_model_2010_2011')
+
+    figLossTrain = plt.figure()
+    plt.plot(np.array(test_loss).squeeze(),'r')
+
+    figLossTrain.savefig(RESULTS_DIR +'/'+ 'train_loss.jpg', bbox_inches = 'tight')
+
+    # JUST TEST CELL
+
     batch_size = 100
-
-    model = LSTMModel.LSTM_Model(input_dim, hidden_dim, layer_dim, output_dim)
-
-    # Instantiating Loss Class
-    criterion = nn.MSELoss()
-
-    # Instantiate Optimizer Class
-    learning_rate = 0.001
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-
-    # initializing lists to store losses over epochs:
-    train_loss = []
-    train_iter = []
-    print("Preparing model to train");
-else:
-    model = torch.load('LSTM_Results/Exp2_1/' + test_location + '/torch_model_2010_2011')
-    print("Loaded model from file\n");
-
-
-# Test set
-
-test_loss = []
-test_iter = []
-# converting numpy array to torch tensor
-
-X_test = torch.from_numpy(X_test)
-y_test = torch.from_numpy(y_test)
-
-# Convert to Float tensor
-
-X_test = X_test.type(torch.FloatTensor)
-y_test = y_test.type(torch.FloatTensor)
-
-
-
-if run_train:
-    X_train = torch.from_numpy(X_train)
-    y_train = torch.from_numpy(y_train)
-    X_train = X_train.type(torch.FloatTensor)
-    y_train = y_train.type(torch.FloatTensor)
-
-    # Training the model
     seq_dim = 1
-
-    n_iter = 0
-    num_samples = len(X_train)
     test_samples = len(X_test)
     batch_size = 100
-    #num_epochs = 1000  # Defined earlier using args
-    feat_dim = X_train.shape[1]
+    feat_dim = X_test.shape[1]
 
-
-    for epoch in range(num_epochs):
-        for i in range(0, int(num_samples/batch_size -1)):
-
-
-            features = Variable(X_train[i*batch_size:(i+1)*batch_size, :]).view(-1, seq_dim, feat_dim)
-            Kt_value = Variable(y_train[i*batch_size:(i+1)*batch_size])
-
-            #print("Kt_value={}".format(Kt_value))
-
-            optimizer.zero_grad()
-
-            outputs = model(features)
-            #print("outputs ={}".format(outputs))
-
-            loss = criterion(outputs, Kt_value)
-
-            train_loss.append(loss.data[0])
-            train_iter.append(n_iter)
-
-            #print("loss = {}".format(loss))
-            loss.backward()
-
-            optimizer.step()
-
-            n_iter += 1
-            test_batch_mse =list()
-            if n_iter%100 == 0:
-                for i in range(0, int(test_samples/batch_size -1)):
-                    features = Variable(X_test[i*batch_size:(i+1)*batch_size, :]).view(-1, seq_dim, feat_dim)
-                    Kt_test = Variable(y_test[i*batch_size:(i+1)*batch_size])
-
-                    outputs = model(features)
-
-                    test_batch_mse.append(np.mean([(Kt_test.data.numpy() - outputs.data.numpy().squeeze())**2],axis=1))
-
-                test_iter.append(n_iter)
-                test_loss.append(np.mean([test_batch_mse], axis=1))
-
-                print('Epoch: {} Iteration: {}. Train_MSE: {}. Test_MSE: {}'.format(epoch, n_iter, loss.data[0], test_loss[-1]))
-
-    torch.save(model,MODEL_DIR+ '/torch_model_2010_2011')
-
-figLossTrain = plt.figure()
-plt.plot(np.array(test_loss).squeeze(),'r')
-
-figLossTrain.savefig(RESULTS_DIR +'/'+ 'train_loss.jpg', bbox_inches = 'tight')
-
-# JUST TEST CELL
-
-batch_size = 100
-seq_dim = 1
-test_samples = len(X_test)
-batch_size = 100
-feat_dim = X_test.shape[1]
-
-# initializing lists to store losses over epochs:
-test_loss = []
-test_iter = []
-test_batch_mse = list()
+    # initializing lists to store losses over epochs:
+    test_loss = []
+    test_iter = []
+    test_batch_mse = list()
 
 
 
-for i in range(0,int(test_samples/batch_size -1)):
-    features = Variable(X_test[i*batch_size:(i+1)*batch_size, :]).view(-1, seq_dim, feat_dim)
-    Kt_test = Variable(y_test[i*batch_size:(i+1)*batch_size])
+    for i in range(0,int(test_samples/batch_size -1)):
+        features = Variable(X_test[i*batch_size:(i+1)*batch_size, :]).view(-1, seq_dim, feat_dim)
+        Kt_test = Variable(y_test[i*batch_size:(i+1)*batch_size])
 
-    outputs = model(features)
+        outputs = model(features)
 
-    test_batch_mse.append(np.mean([(Kt_test.data.numpy() - outputs.data.numpy().squeeze())**2],axis=1))
+        test_batch_mse.append(np.mean([(Kt_test.data.numpy() - outputs.data.numpy().squeeze())**2],axis=1))
 
-    test_iter.append(i)
-    test_loss.append(np.mean([test_batch_mse],axis=1))
-
-
-if run_train:
-    print("len(train_loss):",len(train_loss))
-    plt.plot(train_loss,'-')
+        test_iter.append(i)
+        test_loss.append(np.mean([test_batch_mse],axis=1))
 
 
-print("len(test_loss):",len(test_loss))
-figLoss = plt.figure()
-plt.plot(np.array(test_loss).squeeze(),'r')
+    if run_train:
+        print("len(train_loss):",len(train_loss))
+        plt.plot(train_loss,'-')
 
-figLoss.savefig(RESULTS_DIR + '/' + 'test_loss.jpg', bbox_inches = 'tight')
 
+    print("len(test_loss):",len(test_loss))
+    figLoss = plt.figure()
+    plt.plot(np.array(test_loss).squeeze(),'r')
+
+    figLoss.savefig(RESULTS_DIR + '/' + 'test_loss.jpg', bbox_inches = 'tight')
+
+if __name__=='__main__':
+    main()
 
 
 postprocessing_and_results.PostProcess(run_train, test_loss, df_new_test, RESULTS_DIR, train_loss)
