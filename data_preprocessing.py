@@ -153,12 +153,21 @@ class PreProcess:
         for m in df_new_test.index.levels:
             levels_index2.append(m)
 
-        for i in levels_index2[0]:
-            for j in levels_index2[1]:
+        # for i in levels_index2[0]:
+        #     for j in levels_index2[1][:-3]:
+        #         df_new_test.loc[i].loc[j]['Kt'] = df_new_test.loc[i].loc[j]['Kt'].shift(-1)
+        #         df_new_test.loc[i].loc[j]['Kt_2'] = df_new_test.loc[i].loc[j]['Kt_2'].shift(-2)
+        #         df_new_test.loc[i].loc[j]['Kt_3'] = df_new_test.loc[i].loc[j]['Kt_3'].shift(-3)
+        #         df_new_test.loc[i].loc[j]['Kt_4'] = df_new_test.loc[i].loc[j]['Kt_4'].shift(-4)
+
+        for i, j in zip(levels_index2[0], levels_index2[1]):
+            try:
                 df_new_test.loc[i].loc[j]['Kt'] = df_new_test.loc[i].loc[j]['Kt'].shift(-1)
                 df_new_test.loc[i].loc[j]['Kt_2'] = df_new_test.loc[i].loc[j]['Kt_2'].shift(-2)
                 df_new_test.loc[i].loc[j]['Kt_3'] = df_new_test.loc[i].loc[j]['Kt_3'].shift(-3)
                 df_new_test.loc[i].loc[j]['Kt_4'] = df_new_test.loc[i].loc[j]['Kt_4'].shift(-4)
+            except KeyError:
+                continue
 
         df_new_test = df_new_test[~(df_new_test['Kt_4'].isnull())]
 
