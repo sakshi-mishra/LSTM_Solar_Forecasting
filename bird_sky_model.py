@@ -41,7 +41,7 @@ class ClearSky:
            cs_2010and2011.drop(['dni','dhi'],axis=1, inplace=True) #updating the same dataframe by dropping two columns
            cs_2010and2011.reset_index(inplace=True)
 
-           cs_2010and2011['index']=cs_2010and2011['index'].apply(lambda x:x.to_datetime())
+           cs_2010and2011['index']=cs_2010and2011['index'].apply(lambda x:pd.to_datetime(x))
            cs_2010and2011['year'] = cs_2010and2011['index'].apply(lambda x:x.year)
            cs_2010and2011['month'] = cs_2010and2011['index'].apply(lambda x:x.month)
            cs_2010and2011['day'] = cs_2010and2011['index'].apply(lambda x:x.day)
