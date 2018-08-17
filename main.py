@@ -29,7 +29,7 @@ pathlib.Path(RESULTS_DIR).mkdir(parents=True, exist_ok=True)
 log_file = RESULTS_DIR + '/' + 'console.log'
 print("Writing print statements to ", log_file)
 #sys.stdout = open(log_file, 'w')  # Redirect print statement's outputs to file
-print("Stdout:")
+#print("Stdout:")
 
 
 ### CONFIGURE RUNS
@@ -47,22 +47,22 @@ print("Stdout:")
 # bird_sky_model.py's output here
 clear_sky_ghi = bird_sky_model.ClearSky(test_location, test_year, run_train)
 cs_test, cs_2010and2011 = clear_sky_ghi.cs_ghi()
-print("Clear Sky GHI calculation module executed")
+print("bird_sky_model.py module executed successfully")
 
 # data_input.py's output here
 input_data = data_input.DataInput(test_location, test_year, run_train, cs_test, cs_2010and2011)
 df_train, df_test = input_data.load_n_merge()
-print("data_input module executed successfully")
+print("data_input.py module executed successfully")
 
 # exploratory data analysis
 eda_plots = exploratory_data_analysis.EDA(df_test)
 plots = eda_plots.ghi_plot()
-print("Exploratory Data Analysis module executed")
+print("exploratory_data_analysis.py module executed successfully")
 
 # cleaning the data - removing the outliers
 df = data_cleaning.CleanData(df_train, df_test, run_train)
 df_train, df_test = df.clean()
-print("Data cleaning module executed (the time consuming one)")
+print("data_cleaning.py module executed successfully")
 
 ### start of LSTM
 def main():
@@ -72,7 +72,7 @@ def main():
 
     Xy = data_preprocessing.PreProcess(df_train, df_test, run_train)
     X_train, y_train, X_test, y_test, df_new_test = Xy.data_prepro()
-    print("Data Preprocessing module executed")
+    print("data_preprocessing.py module executed successfully")
 
     if run_train:
         # Instantiating Model Class
@@ -82,9 +82,9 @@ def main():
         output_dim = 4
         batch_size = 100
 
-        mod = LSTMModel.LSTM_Model(input_dim, hidden_dim, layer_dim, output_dim)
-        model = mod.forward()
-        print("LSTM model module executed to obtain the model")
+        model = LSTMModel.LSTM_Model(input_dim, hidden_dim, layer_dim, output_dim)
+        #model = mod.forward()
+        print("LSTM model module executed to instantiate the LSTMmodel, with run_train=True")
 
         # Instantiating Loss Class
         criterion = nn.MSELoss()
@@ -99,7 +99,7 @@ def main():
         print("Preparing model to train");
     else:
         model = torch.load('LSTM_Results/Exp2_1/' + test_location + '/torch_model_2010_2011')
-        print("Loaded model from file\n");
+        print("Loaded model from file, given run_train=False\n");
 
 
     # Test set
@@ -197,6 +197,7 @@ def main():
 
 
     print("Starting to test the model, given run_train=False")
+
     for i in range(0,int(test_samples/batch_size -1)):
         features = Variable(X_test[i*batch_size:(i+1)*batch_size, :]).view(-1, seq_dim, feat_dim)
         Kt_test = Variable(y_test[i*batch_size:(i+1)*batch_size])
