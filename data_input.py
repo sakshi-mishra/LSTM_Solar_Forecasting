@@ -1,8 +1,8 @@
 import pandas as pd
 import glob
-from pandas.compat import StringIO
 
 ### Import files from each year in a separate dataframe
+
 
 class DataInput:
     def __init__(self, test_location, test_year, run_train, cs_test, cs_2010and2011):
@@ -38,22 +38,40 @@ class DataInput:
             print("loaded training set\n");
             print("df_train.shape=", df_train.shape)
 
+            # Test set
+            path = r'./data/' + self.test_location + '/Exp_1_test/' + self.test_year
+            print(path)
+            all_files = glob.glob(path + "/*.dat")
+            all_files.sort()
 
+            df_big_test = pd.concat((pd.read_csv(f, skipinitialspace = True, quotechar = '"', skiprows=(2),delimiter=' ',
+                             index_col=False, header=None, names=cols) for f in all_files), ignore_index=True)
 
-        # Test set
-        path = r'./data/' + self.test_location + '/Exp_1_test/' + self.test_year
-        print(path)
-        all_files = glob.glob(path + "/*.dat")
-        all_files.sort()
+            ### Merging Clear Sky GHI And the big dataframe
 
-        df_big_test = pd.concat((pd.read_csv(f, skipinitialspace = True, quotechar = '"', skiprows=(2),delimiter=' ',
-                         index_col=False, header=None, names=cols) for f in all_files), ignore_index=True)
+            df_test = pd.merge(df_big_test, self.cs_test, on=['year','month','day','hour','min'])
+            print('df_test.shape:', df_test.shape)
+            print("loaded test set\n");
+            print('df_big_test.shape:', df_big_test.shape)
 
-        ### Merging Clear Sky GHI And the big dataframe
+            return df_train, df_test
 
-        df_test = pd.merge(df_big_test, self.cs_test, on=['year','month','day','hour','min'])
-        print('df_test.shape:', df_test.shape)
-        print("loaded test set\n");
-        print('df_big_test.shape:', df_big_test.shape)
+        else:
+            # Test set
+            path = r'./data/' + self.test_location + '/Exp_1_test/' + self.test_year
+            print(path)
+            all_files = glob.glob(path + "/*.dat")
+            all_files.sort()
 
-        return df_train, df_test
+            df_big_test = pd.concat((pd.read_csv(f, skipinitialspace=True, quotechar='"', skiprows=(2), delimiter=' ',
+                                                 index_col=False, header=None, names=cols) for f in all_files),
+                                    ignore_index=True)
+
+            ### Merging Clear Sky GHI And the big dataframe
+
+            df_test = pd.merge(df_big_test, self.cs_test, on=['year', 'month', 'day', 'hour', 'min'])
+            print('df_test.shape:', df_test.shape)
+            print("loaded test set\n");
+            print('df_big_test.shape:', df_big_test.shape)
+
+            return df_test
