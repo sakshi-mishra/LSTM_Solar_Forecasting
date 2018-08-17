@@ -41,7 +41,8 @@ class ClearSky:
            cs_2010and2011.drop(['dni','dhi'],axis=1, inplace=True) #updating the same dataframe by dropping two columns
            cs_2010and2011.reset_index(inplace=True)
 
-           cs_2010and2011['index']=cs_2010and2011['index'].apply(lambda x:pd.to_datetime(x))
+           #cs_2010and2011['index']=cs_2010and2011['index'].apply(lambda x:x.to_datetime())
+           cs_2010and2011['index']=pd.to_datetime(cs_2010and2011['index'])
            cs_2010and2011['year'] = cs_2010and2011['index'].apply(lambda x:x.year)
            cs_2010and2011['month'] = cs_2010and2011['index'].apply(lambda x:x.month)
            cs_2010and2011['day'] = cs_2010and2011['index'].apply(lambda x:x.day)
@@ -59,7 +60,8 @@ class ClearSky:
         cs_test.drop(['dni','dhi'],axis=1, inplace=True) #updating the same dataframe by dropping two columns
         cs_test.reset_index(inplace=True)
 
-        cs_test['index']= cs_test['index'].apply(lambda x:x.to_datetime())
+        #cs_test['index']= cs_test['index'].apply(lambda x:x.to_datetime())
+        cs_test['index'] = pd.to_datetime(cs_test['index'])
         cs_test['year'] = cs_test['index'].apply(lambda x:x.year)
         cs_test['month'] = cs_test['index'].apply(lambda x:x.month)
         cs_test['day'] = cs_test['index'].apply(lambda x:x.day)

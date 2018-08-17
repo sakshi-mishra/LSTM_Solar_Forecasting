@@ -54,7 +54,7 @@ df_train, df_test = input_data.load_n_merge()
 
 # exploratory data analysis
 eda_plots = exploratory_data_analysis.EDA(df_test)
-plots = eda_plots.plot()
+plots = eda_plots.ghi_plot()
 
 # cleaning the data - removing the outliers
 df = data_cleaning.CleanData(df_train, df_test, run_train)

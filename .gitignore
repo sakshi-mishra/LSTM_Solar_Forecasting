@@ -2,3 +2,5 @@ LSTM_original_single_script.py
 run_exp2_1.py
 .idea/
 Data/
+LSTM_Results/
+__pycache__/

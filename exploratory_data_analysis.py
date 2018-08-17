@@ -1,4 +1,4 @@
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import seaborn as sns
 
 ### Exploratory Data analysis
@@ -8,7 +8,7 @@ class EDA:
     def __init__(self, df_test):
         self.df_test = df_test
 
-    def plot(self):
+    def ghi_plot(self):
 
         dw_solar_everyday = self.df_test.groupby(['jday'])['dw_solar'].mean()
         ghi_everyday = self.df_test.groupby(['jday'])['ghi'].mean()
