@@ -1,4 +1,4 @@
-# PyTorch implementation of LSTM Model for Multi-time-horizon Solar Forecasting (on-going)
+# PyTorch implementation of LSTM Model for Multi-time-horizon Solar Forecasting
 
 ## How to Run
 ### Conda environment for running the code 
@@ -16,4 +16,3 @@
 
 The training and testing data needs to be downloaded from the [NOAA FTP server](ftp://aftp.cmdl.noaa.gov/data/radiation/surfrad/) for the locations/sites. You can use GNU wget to automate the download process. The scripts assume that the data is in the *data* folder as per the structure outlined in the [data_dir_struct.txt](data_dir_struct.txt) file.
 
-*Note*: This project is under development. 
