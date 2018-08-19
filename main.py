@@ -67,8 +67,7 @@ print("data_cleaning.py module executed successfully")
 ### start of LSTM
 def main():
 
-    # pre-processing the data by making the Kt (clear sky index at time t) column
-    # by first removing rows with ghi==0
+    # pre-processing the data by making the Kt (ClearSkyIndex at time t) col by first removing rows with ghi==0
 
     Xy = data_preprocessing.PreProcess(df_train, df_test, run_train)
     X_train, y_train, X_test, y_test, df_new_test = Xy.data_prepro()
@@ -196,7 +195,7 @@ def main():
     test_batch_mse = list()
 
 
-    print("Starting to test the model, given run_train=False")
+    print("Starting to test the model")
 
     for i in range(0,int(test_samples/batch_size -1)):
         features = Variable(X_test[i*batch_size:(i+1)*batch_size, :]).view(-1, seq_dim, feat_dim)
