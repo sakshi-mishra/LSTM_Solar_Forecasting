@@ -5,3 +5,4 @@ Data/
 LSTM_Results/
 __pycache__/
 lstm.py
+run_exp.py
