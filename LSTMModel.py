@@ -11,22 +11,22 @@ class LSTM_Model(nn.Module):
         # Number of hidden layers
         self.layer_dim = layer_dim
 
-        #Building the RNN
-        self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, output_dim)
+        #Building the LSTM
+        self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, output_dim, batch_first=True)
 
         # Readout layer
         self.fc = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x):
         # Initializing the hidden state with zeros
-        # (layer_dim, batch_size, hidden_dim)
+        # (input, hx, batch_sizes)
         h0 = Variable(torch.zeros(self.layer_dim, x.size(0), self.hidden_dim))
 
         c0 = Variable(torch.zeros(self.layer_dim, x.size(0), self.hidden_dim))
 
 
         #One time step (the last one perhaps?)
-        out, (hn,cn) = self.lstm(x, (h0,c0))
+        out, (hn,cn) = self.lstm(x, (h0, c0))
 
         # Indexing hidden state of the last time step
         # out.size() --> ??
