@@ -13,7 +13,8 @@ sites = ["Bondville", "Boulder", "Desert_Rock",
 test_year = ["2009", "2015", "2016", "2017"]
 SCRIPT_NAME = "main.py"
 
-script_path = "/home/reopt/Documents/solar_forecasting/LSTM_Solar_Forecasting/"
+#script_path = "/home/reopt/Documents/solar_forecasting/LSTM_Solar_Forecasting/"
+python_bin = "/home/reopt/anaconda3/envs/sf_ve/bin/python"
 
 
 for site in sites:
@@ -28,9 +29,9 @@ for site in sites:
             pathlib.Path(RESULTS_DIR).mkdir(parents=True, exist_ok=True)
             log_file = RESULTS_DIR + '/' + 'stdout.log'
 
-            # proc = ["xterm", "-e","python", SCRIPT_NAME , site
+            # proc = ["xterm", "-e",python_bin, SCRIPT_NAME , site
             #                   , year, "false", "2>&1", "|", "tee", log_file]
-            proc = ["python", SCRIPT_NAME, site, year, "false", ">", log_file]
+            proc = [python_bin , SCRIPT_NAME, site, year, "false", ">", log_file]
 
             print(' '.join(proc))
             Popen(proc,stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -40,13 +41,14 @@ for site in sites:
 
         RESULTS_DIR = 'LSTM_Results/Exp2_1/' + site + '/' + test_year[0]
         pathlib.Path(RESULTS_DIR).mkdir(parents=True, exist_ok=True)
-        log_file = script_path+ '/'+ RESULTS_DIR + '/' + 'stdout.log'
-        # proc = ["xterm", "-e", "python", SCRIPT_NAME , site
+        #log_file = script_path+ '/'+ RESULTS_DIR + '/' + 'stdout.log'
+        log_file = RESULTS_DIR + '/' + 'stdout.log'
+        # proc = ["xterm", "-e", python_bin, SCRIPT_NAME , site
         #                       , test_year[0], "true", "2>&1", "|", "tee", log_file]
 
-        proc = ["python", SCRIPT_NAME, site, test_year[0], "false", ">", log_file]
+        proc = [python_bin, SCRIPT_NAME, site, test_year[0], "false", ">", log_file]
 
-        print(' '.join(proc))   
+        print(' '.join(proc))
         Popen(proc, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
 
@@ -55,9 +57,9 @@ for site in sites:
             pathlib.Path(RESULTS_DIR).mkdir(parents=True, exist_ok=True)
             log_file = RESULTS_DIR + '/' + 'stdout.log'
 
-            # proc = ["xterm", "-e","python", SCRIPT_NAME , site
+            # proc = ["xterm", "-e", python_bin, SCRIPT_NAME , site
             #                   , year, "false", "2>&1", "|", "tee", log_file]
-            proc = ["python",
+            proc = [python_bin,
                     SCRIPT_NAME, site, year, "false", ">", log_file]
 
             print(' '.join(proc))
