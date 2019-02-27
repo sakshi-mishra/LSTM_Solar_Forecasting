@@ -3,6 +3,8 @@
 import sys
 import numpy as np
 import pathlib  # To mimick mkdir -p
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
@@ -176,10 +178,14 @@ def main():
 
         torch.save(model,MODEL_DIR+ '/torch_model_2010_2011')
 
-    figLossTrain = plt.figure()
-    plt.plot(np.array(test_loss).squeeze(),'r')
+    try:
+        figLossTrain = plt.figure()
+        plt.plot(np.array(test_loss).squeeze(),'r')
 
-    figLossTrain.savefig(RESULTS_DIR +'/'+ 'train_loss.jpg', bbox_inches = 'tight')
+        figLossTrain.savefig(RESULTS_DIR +'/'+ 'train_loss.jpg', bbox_inches = 'tight')
+    except RuntimeError as err:
+        print("Skipping error:", err)
+        pass
 
     # JUST TEST CELL
 
@@ -211,14 +217,22 @@ def main():
 
     if run_train:
         print("len(train_loss):",len(train_loss))
-        plt.plot(train_loss,'-')
+        try:
+            plt.plot(train_loss,'-')
+        except RuntimeError as E:
+            print("Skipping plot. Is X running or Agg backend set?")
+            pass
 
 
     print("len(test_loss):",len(test_loss))
-    figLoss = plt.figure()
-    plt.plot(np.array(test_loss).squeeze(),'r')
+    try:
 
-    figLoss.savefig(RESULTS_DIR + '/' + 'test_loss.jpg', bbox_inches = 'tight')
+        figLoss = plt.figure()
+        plt.plot(np.array(test_loss).squeeze(),'r')
+
+        figLoss.savefig(RESULTS_DIR + '/' + 'test_loss.jpg', bbox_inches = 'tight')
+    except RuntimeError as E:
+        print("Not plotting. Probably no X")
 
     return test_loss, train_loss, df_new_test
 

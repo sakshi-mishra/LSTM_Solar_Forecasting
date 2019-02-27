@@ -23,7 +23,7 @@ class DataInput:
 
         if self.run_train:
             # Train Set
-            path = r'/home/reopt/Documents/solar_forecasting/data/' + self.test_location + '/Exp_1_train'
+            path = r'data/' + self.test_location + '/Exp_1_train'
             print("train_path:",path)
             all_files = glob.glob(path + "/*.dat")
             all_files.sort()
@@ -39,7 +39,7 @@ class DataInput:
             print("df_train.shape=", df_train.shape)
 
             # Test set
-            path = r'/home/reopt/Documents/solar_forecasting/data/' + self.test_location + '/Exp_1_test/' + self.test_year
+            path = r'data/' + self.test_location + '/Exp_1_test/' + self.test_year
             print(path)
             all_files = glob.glob(path + "/*.dat")
             all_files.sort()

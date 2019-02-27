@@ -14,16 +14,17 @@ test_year = ["2009", "2015", "2016", "2017"]
 SCRIPT_NAME = "main.py"
 
 #script_path = "/home/reopt/Documents/solar_forecasting/LSTM_Solar_Forecasting/"
-python_bin = "/home/reopt/anaconda3/envs/sf_ve/bin/python"
+#python_bin = "/home/reopt/anaconda3/envs/sf_ve/bin/python"
+python_bin = "/home/smishra/.conda-envs/sf_ve/bin/python"
 
 
-for site in sites:
+for site in sites[0]:
     MODEL_DIR = 'LSTM_Results/Exp2_1/' + site
     # NOTE: The Name of the model file has to match with the training script
     MODEL_FILE = MODEL_DIR + '/torch_model_2010_2011'
     if pathlib.Path(MODEL_FILE).is_file():
         # A trained model exists. So just run tests
-        for year in test_year:
+        for year in test_year[0]:
 
             RESULTS_DIR = 'LSTM_Results/Exp2_1/' + site + '/' + year
             pathlib.Path(RESULTS_DIR).mkdir(parents=True, exist_ok=True)
@@ -52,7 +53,7 @@ for site in sites:
         Popen(proc, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
 
-        for year in test_year[1:]:
+        for year in test_year[1:2]:
             # Launch test scripts for this site and this year RESULTS_DIR = 'LSTM_Results/Exp2_1/' + site + '/' + year
             pathlib.Path(RESULTS_DIR).mkdir(parents=True, exist_ok=True)
             log_file = RESULTS_DIR + '/' + 'stdout.log'
