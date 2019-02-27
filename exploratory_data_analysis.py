@@ -25,10 +25,10 @@ class EDA:
         axes1.set_title('Solar Irradiance - Test Year 2009')
         axes1.legend(loc='best')
 
-        fig.savefig('LSTM_Results/Exp2_1/' + test_location + '/'+  test_year + 'Figure 2.jpg', bbox_inches = 'tight')
+        # fig.savefig('LSTM_Results/Exp2_1/' + test_location + '/'+  test_year + 'Figure 2.jpg', bbox_inches = 'tight')
 
 
         sns.jointplot(x=dw_solar_everyday,y=ghi_everyday,kind='reg')
         plt.xlabel('Observed global downwelling solar (Watts/m^2)')
         plt.ylabel('Clear Sky GHI (Watts/m^2)')
-        plt.savefig('LSTM_Results/Exp2_1/' + test_location + '/'+  test_year + 'Figure 3.jpg', bbox_inches='tight')
+        # plt.savefig('LSTM_Results/Exp2_1/' + test_location + '/'+  test_year + 'Figure 3.jpg', bbox_inches='tight')
