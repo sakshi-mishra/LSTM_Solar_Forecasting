@@ -16,13 +16,18 @@ SCRIPT_NAME = "main.py"
 script_path = "/home/reopt/Documents/solar_forecasting/LSTM_Solar_Forecasting/"
 
 
-for site in sites:
+#for site in sites:
+for i in range(1):
+    site = sites[i]
+
     MODEL_DIR = 'LSTM_Results/Exp2_1/' + site
     # NOTE: The Name of the model file has to match with the training script
     MODEL_FILE = MODEL_DIR + '/torch_model_2010_2011'
     if pathlib.Path(MODEL_FILE).is_file():
         # A trained model exists. So just run tests
-        for year in test_year:
+        # for year in test_year[0]:
+        for i in range(1):
+            year = test_year[i]
 
             RESULTS_DIR = 'LSTM_Results/Exp2_1/' + site + '/' + year
             pathlib.Path(RESULTS_DIR).mkdir(parents=True, exist_ok=True)
@@ -30,10 +35,10 @@ for site in sites:
 
             # proc = ["xterm", "-e","python", SCRIPT_NAME , site
             #                   , year, "false", "2>&1", "|", "tee", log_file]
-            proc = ["python", SCRIPT_NAME, site, year, "false", ">", log_file]
+            proc = ["python", SCRIPT_NAME, site, year, "true", ">", log_file]
 
             print(' '.join(proc))
-            Popen(proc,stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            Popen(proc,stdin=subprocess.PIPE)
     else :
         # No trained model exists. We need to train as well
         # Train and test with test_year[0]
@@ -44,13 +49,15 @@ for site in sites:
         # proc = ["xterm", "-e", "python", SCRIPT_NAME , site
         #                       , test_year[0], "true", "2>&1", "|", "tee", log_file]
 
-        proc = ["python", SCRIPT_NAME, site, test_year[0], "false", ">", log_file]
+        proc = ["python", SCRIPT_NAME, site, test_year[0], "true", ">", log_file]
 
         print(' '.join(proc))   
-        Popen(proc, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        Popen(proc, stdin=subprocess.PIPE)
 
 
-        for year in test_year[1:]:
+        for i in range(1):
+        # for year in test_year[1:2]:
+            year = test_year[i]
             # Launch test scripts for this site and this year RESULTS_DIR = 'LSTM_Results/Exp2_1/' + site + '/' + year
             pathlib.Path(RESULTS_DIR).mkdir(parents=True, exist_ok=True)
             log_file = RESULTS_DIR + '/' + 'stdout.log'
@@ -61,4 +68,4 @@ for site in sites:
                     SCRIPT_NAME, site, year, "false", ">", log_file]
 
             print(' '.join(proc))
-            Popen(proc, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            Popen(proc, stdin=subprocess.PIPE)
