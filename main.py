@@ -238,7 +238,6 @@ def main():
 
 if __name__=='__main__':
     test_loss, train_loss, df_new_test = main()
-
-
-print("About to start post processing the results")
-postprocessing_and_results.PostProcess(run_train, test_loss, df_new_test, RESULTS_DIR, train_loss)
+    print("About to start post processing the results")
+    results = postprocessing_and_results.PostProcess(run_train, test_loss, df_new_test, RESULTS_DIR, train_loss)
+    results.write_to_file()
