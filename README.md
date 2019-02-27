@@ -4,7 +4,7 @@
 ### Conda environment for running the code 
   A conda environment file is provided for convenience. Assuming you have Anaconda python distribution available on your computer, you can create a new conda environment with the necessary packages using the following command:
 
-`conda env create -f conda_env.yaml -n "multi_time_horizon"`
+`conda env create -f multi-tscale-slim.yaml -n "multi_time_horizon"`
   
 ### Running the code
   1. Clone (or download) the repository: 
