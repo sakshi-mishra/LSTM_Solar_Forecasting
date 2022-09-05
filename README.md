@@ -16,3 +16,6 @@
 
 The training and testing data needs to be downloaded from the [NOAA FTP server](ftp://aftp.cmdl.noaa.gov/data/radiation/surfrad/) for the locations/sites. You can use GNU wget to automate the download process. The scripts assume that the data is in the *data* folder as per the structure outlined in the [data_dir_struct.txt](data_dir_struct.txt) file.
 
+### Cite this work
+If you find this code useful for your research, please cite the article associated with this code-base:
+[Mishra, Sakshi; Palanisamy, Praveen. "An Integrated Multi-Time-Scale Modeling for Solar Irradiance Forecasting Using Deep Learning." *arxiv](https://arxiv.org/abs/1905.02616)
